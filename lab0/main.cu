@@ -26,6 +26,15 @@ __global__ void TransformCases( char *input_gpu, int fsize ) {
 	}
 }
 
+// Caesar cipher: encrypt characters using Caesar cipher
+__global__ void CaesarCipher( char *input_gpu, int fsize, int key = 16 ) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	if ( idx < fsize && input_gpu[idx] >= 32 && input_gpu[idx] <= 126 ) {
+		int num = input_gpu[idx] - 32;
+		input_gpu[idx] = (num * key) % 95 + 32;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	// init, and check
@@ -57,7 +66,7 @@ int main(int argc, char **argv)
 	// Don't transform over the tail
 	// And don't transform the line breaks
 	while ( static_cast<long>(fsize) > 0 ) {
-		TransformCases<<<kNumBlock, kNumThread>>>(input_gpu, fsize);
+		CaesarCipher<<<kNumBlock, kNumThread>>>(input_gpu, fsize);
 		input_gpu += kNumBlock * kNumThread;
 		fsize     -= kNumBlock * kNumThread;
 	}

@@ -5,20 +5,15 @@ TARGET = main
 BINS   = $(TARGET)
 SRCS   = $(wildcard *.cu)
 OBJS   = $(SRCS:%.cu=%.o)
-DEPS   = $(OBJS:%.o=%.d)
 INCS   = -isystem ../utils
 LIBS   =
 LNKS   =
 
 RM      = rm -rf
 
-.PHONY: all dep clean
+.PHONY: all clean
 
 all: $(BINS)
-	@ echo > /dev/null
-
-dep: $(DEPS)
-	@ echo > /dev/null
 
 run: $(TARGET) test.txt
 	./$(TARGET) test.txt
@@ -29,10 +24,5 @@ $(BINS): $(OBJS)
 %.o: %.cu
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCS)
 
-%.d: %.cu
-	@ $(CXX) $(CXXFLAGS) -E --compiler-options -M $< $(INCS) > $@
-
 clean:
-	$(RM) $(BINS) $(OBJS) $(DEPS)
-
--include $(DEPS)
+	$(RM) $(BINS) $(OBJS)
