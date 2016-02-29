@@ -10,10 +10,19 @@
 	}\
 }
 
-__global__ void SomeTransform(char *input_gpu, int fsize) {
+const auto kNumBlock = 4;
+const auto kNumThread = 64;
+
+// Transform cases: convert lower cases to upper ones, and vice versa
+__global__ void TransformCases( char *input_gpu, int fsize ) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	if (idx < fsize and input_gpu[idx] != '\n') {
-		input_gpu[idx] = '!';
+	if ( idx < fsize && input_gpu[idx] != '\n' ) {
+		auto &c = input_gpu[idx];
+		if ( c >= 'a' && c <= 'z' ) {
+			c += 'A'-'a';
+		} else if ( c >= 'A' && c <= 'Z' ) {
+			c += 'a'-'A';
+		}
 	}
 }
 
@@ -47,7 +56,11 @@ int main(int argc, char **argv)
 	// An example: transform the first 64 characters to '!'
 	// Don't transform over the tail
 	// And don't transform the line breaks
-	SomeTransform<<<2, 32>>>(input_gpu, fsize);
+	while ( static_cast<long>(fsize) > 0 ) {
+		TransformCases<<<kNumBlock, kNumThread>>>(input_gpu, fsize);
+		input_gpu += kNumBlock * kNumThread;
+		fsize     -= kNumBlock * kNumThread;
+	}
 
 	puts(text_smem.get_cpu_ro());
 	return 0;
