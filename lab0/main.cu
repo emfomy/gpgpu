@@ -10,14 +10,17 @@
 	}\
 }
 
+/// Define default number of blocks and threads
 const auto kNumBlock = 4;
 const auto kNumThread = 64;
 
-// Transform cases: convert lower cases to upper ones, and vice versa
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Transform cases: convert lower cases to upper ones, and vice versa
+///
 __global__ void TransformCases( char *input_gpu, int fsize ) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	if ( idx < fsize && input_gpu[idx] != '\n' ) {
-		auto &c = input_gpu[idx];
+	auto &c = input_gpu[idx];
+	if ( idx < fsize ) {
 		if ( c >= 'a' && c <= 'z' ) {
 			c += 'A'-'a';
 		} else if ( c >= 'A' && c <= 'Z' ) {
@@ -26,12 +29,34 @@ __global__ void TransformCases( char *input_gpu, int fsize ) {
 	}
 }
 
-// Caesar cipher: encrypt characters using Caesar cipher
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Caesar cipher: encrypt characters using Caesar cipher
+///
+/// output = input * key % 95
+/// Will only convert the visible characters. The default key is 16.
+///
 __global__ void CaesarCipher( char *input_gpu, int fsize, int key = 16 ) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	if ( idx < fsize && input_gpu[idx] >= 32 && input_gpu[idx] <= 126 ) {
-		int num = input_gpu[idx] - 32;
-		input_gpu[idx] = (num * key) % 95 + 32;
+	auto &c = input_gpu[idx];
+	if ( idx < fsize && c >= 32 && c <= 126 ) {
+		c = (static_cast<int>(c-32) * key) % 95 + 32;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Swap the characters: maps the vowels to vowels and consonant to consonant
+///
+/// Uses Caesar cipher: output = (input * 25 + 8) % 26
+///
+__global__ void SwapVowelConsonant( char *input_gpu, int fsize ) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	auto &c = input_gpu[idx];
+	if ( idx < fsize ) {
+		if ( c >= 'a' && c <= 'z' ) {
+			c = (static_cast<int>(c-'a') * 25 + 8) % 26 + 'a';
+		} else if ( c >= 'A' && c <= 'Z' ) {
+			c = (static_cast<int>(c-'A') * 25 + 8) % 26 + 'A';
+		}
 	}
 }
 
@@ -66,7 +91,7 @@ int main(int argc, char **argv)
 	// Don't transform over the tail
 	// And don't transform the line breaks
 	while ( static_cast<long>(fsize) > 0 ) {
-		CaesarCipher<<<kNumBlock, kNumThread>>>(input_gpu, fsize);
+		SwapVowelConsonant<<<kNumBlock, kNumThread>>>(input_gpu, fsize);
 		input_gpu += kNumBlock * kNumThread;
 		fsize     -= kNumBlock * kNumThread;
 	}
