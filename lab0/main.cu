@@ -44,7 +44,7 @@ __global__ void CaesarCipher( char *input_gpu, int fsize, int key = 16 ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Swap the characters: maps the vowels to vowels and consonant to consonant
+/// Swap the characters: maps the vowels/consonant/numbers to vowels/consonant/numbers
 ///
 /// Uses Caesar cipher: output = (input * 25 + 8) % 26
 ///
@@ -56,6 +56,8 @@ __global__ void SwapVowelConsonant( char *input_gpu, int fsize ) {
       c = (static_cast<int>(c-'a') * 25 + 8) % 26 + 'a';
     } else if ( c >= 'A' && c <= 'Z' ) {
       c = (static_cast<int>(c-'A') * 25 + 8) % 26 + 'A';
+    } else if ( c >= '0' && c <= '9' ) {
+      c = (static_cast<int>(c-'0') * 9 + 8) % 10 + '0';
     }
   }
 }
