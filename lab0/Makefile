@@ -11,7 +11,7 @@ LNKS   =
 
 RM      = rm -rf
 
-.PHONY: all clean
+.PHONY: all run clean
 
 all: $(BINS)
 
