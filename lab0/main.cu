@@ -2,12 +2,12 @@
 #include <cstdlib>
 #include "SyncedMemory.h"
 
-#define CHECK {\
-  auto e = cudaDeviceSynchronize();\
-  if (e != cudaSuccess) {\
-    printf("At " __FILE__ ":%d, %s\n", __LINE__, cudaGetErrorString(e));\
-    abort();\
-  }\
+#define CHECK { \
+  auto e = cudaDeviceSynchronize(); \
+  if ( e != cudaSuccess ) { \
+    printf("At " __FILE__ ":%d, %s\n", __LINE__, cudaGetErrorString(e)); \
+    abort(); \
+  } \
 }
 
 /// Define default number of blocks and threads
@@ -62,15 +62,14 @@ __global__ void SwapVowelConsonant( char *input_gpu, int fsize ) {
   }
 }
 
-int main(int argc, char **argv)
-{
+int main( int argc, char **argv ) {
   // init, and check
-  if (argc != 2) {
+  if ( argc != 2 ) {
     printf("Usage %s <input text file>\n", argv[0]);
     abort();
   }
   FILE *fp = fopen(argv[1], "r");
-  if (not fp) {
+  if ( not fp ) {
     printf("Cannot open %s", argv[1]);
     abort();
   }
