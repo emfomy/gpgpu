@@ -75,7 +75,7 @@ struct pred {
 /// Extract head
 ///
 int ExtractHead( const int *pos, int *head, int text_size) {
-  int *buffer, nhead;
+  int nhead;
   thrust::device_ptr<const int> pos_d(pos);
   thrust::device_ptr<int> head_d(head);
 
@@ -87,13 +87,49 @@ int ExtractHead( const int *pos, int *head, int text_size) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Part 3, device, reverse words
+///
+__global__
+void Part3Device( char *text, int *pos, int *head, int text_size, int n_head ) {
+  auto i_word = blockIdx.x * blockDim.x + threadIdx.x;
+  int idx_end = (i_word == n_head-1) ? text_size : head[i_word+1];
+  while ( pos[--idx_end] == 0 );
+
+  char temp;
+  for ( auto i = 0; i < (idx_end-head[i_word]) / 2; ++i ) {
+    temp = text[head[i_word]+i];
+    text[head[i_word]+i] = text[idx_end-i];
+    text[idx_end-i] = temp;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Part 3
 ///
 void Part3( char *text, int *pos, int *head, int text_size, int n_head ) {
-#pragma warning
-  static_cast<void>(text);
-  static_cast<void>(pos);
-  static_cast<void>(head);
-  static_cast<void>(text_size);
-  static_cast<void>(n_head);
+// #pragma warning
+//   const int kCheckSize = 1000;
+//   char text_host[kCheckSize];
+
+// #pragma warning
+//   cudaMemcpy(text_host, text, sizeof(char) * kCheckSize, cudaMemcpyDeviceToHost);
+//   for ( auto i = 0; i < kCheckSize; ++i ) {
+//     if ( i % 100 == 0 ) {
+//       printf("\n");
+//     }
+//     printf("%c", (text_host[i] == '\n') ? '_' : text_host[i]);
+//   }
+//   printf("\n");
+
+  Part3Device<<<n_head / kNumThread + 1, kNumThread>>>(text, pos, head, text_size, n_head);
+
+// #pragma warning
+//   cudaMemcpy(text_host, text, sizeof(char) * kCheckSize, cudaMemcpyDeviceToHost);
+//   for ( auto i = 0; i < kCheckSize; ++i ) {
+//     if ( i % 100 == 0 ) {
+//       printf("\n");
+//     }
+//     printf("%c", (text_host[i] == '\n') ? '_' : text_host[i]);
+//   }
+//   printf("\n");
 }
