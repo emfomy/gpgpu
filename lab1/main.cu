@@ -62,8 +62,7 @@ tuple<vector<char>, vector<int>, vector<int>> GenerateTestCase(Engine &eng, cons
   return ret;
 }
 
-int main(int argc, char **argv)
-{
+int main() {
   // Initialize random text
   default_random_engine engine(12345);
   auto text_pos_head = GenerateTestCase(engine, 40000000); // 40 MB data
@@ -110,7 +109,7 @@ int main(int argc, char **argv)
 
   // Part II check
   do {
-    if (n_head != head.size()) {
+    if (uint(n_head) != head.size()) {
       n_head = head.size();
       puts("Part II WA (wrong number of heads)!");
     } else {

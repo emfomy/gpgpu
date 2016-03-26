@@ -15,7 +15,8 @@ __device__ __host__ int CeilAlign( int a, int b ) { return CeilDiv(a, b) * b; }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Count position, step 1, device
 ///
-__global__ void CountPositionDevice1( const char *text, int *pos, int text_size ) {
+__global__
+void CountPositionDevice1( const char *text, int *pos, int text_size ) {
   auto idx = threadIdx.x;
   auto idx_shift = blockIdx.x * blockDim.x;
   text += idx_shift;
@@ -44,7 +45,8 @@ __global__ void CountPositionDevice1( const char *text, int *pos, int text_size 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Count position, step 2, device
 ///
-__global__ void CountPositionDevice2( int *pos, int text_size ) {
+__global__
+void CountPositionDevice2( int *pos, int text_size ) {
   auto idx = threadIdx.x;
   pos += blockIdx.x * blockDim.x;
 
@@ -62,21 +64,25 @@ void CountPosition( const char *text, int *pos, int text_size ) {
   CountPositionDevice2<<<text_size / kNumThread + 1, kNumThread>>>(pos, text_size);
 }
 
+struct pred {
+  __host__ __device__
+  bool operator()( const int x ) {
+    return (x == 1);
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Extract head
 ///
 int ExtractHead( const int *pos, int *head, int text_size) {
-  int *buffer;
-  int nhead;
-  cudaMalloc(&buffer, sizeof(int) * text_size * 2); // this is enough
+  int *buffer, nhead;
   thrust::device_ptr<const int> pos_d(pos);
-  thrust::device_ptr<int> head_d(head), flag_d(buffer), cumsum_d(buffer+text_size);
+  thrust::device_ptr<int> head_d(head);
 
-  // TODO
-#pragma warning
-  nhead = 0;
+  // Extract head
+  thrust::counting_iterator<int> idx_first(0), idx_last = idx_first + text_size;
+  nhead = thrust::copy_if(idx_first, idx_last, pos_d, head_d, pred()) - head_d;
 
-  cudaFree(buffer);
   return nhead;
 }
 

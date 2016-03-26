@@ -5,7 +5,7 @@ TARGET = main
 BINS   = $(TARGET)
 SRCS   = $(wildcard *.cu)
 OBJS   = $(SRCS:%.cu=%.o)
-INCS   = -isystem ../utils
+INCS   = -isystem ../utils -isystem $(CUDAROOT)/include
 LIBS   =
 LNKS   =
 

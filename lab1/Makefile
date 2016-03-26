@@ -6,7 +6,7 @@ BINS   = $(TARGET)
 SRCS   = $(wildcard *.cu)
 HDRS   = $(wildcard *.h)
 OBJS   = $(SRCS:%.cu=%.o)
-INCS   = -isystem ../utils
+INCS   = -isystem ../utils -isystem $(CUDAROOT)/include
 LIBS   =
 LNKS   =
 
