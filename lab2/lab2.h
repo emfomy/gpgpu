@@ -14,6 +14,6 @@ class Lab2VideoGenerator {
  public:
   Lab2VideoGenerator();
   ~Lab2VideoGenerator();
-  void get_info(Lab2VideoInfo &info);
-  void Generate(uint8_t *yuv);
+  void get_info( Lab2VideoInfo &info );
+  void Generate( uint8_t *yuv );
 };

@@ -17,7 +17,7 @@ RM      = rm -rf
 all: $(BINS)
 
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) && ffmpeg -y -i result.y4m result.mkv
 
 $(BINS): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIBS) $(LNKS)
@@ -26,4 +26,4 @@ $(BINS): $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCS)
 
 clean:
-	$(RM) $(BINS) $(OBJS)
+	$(RM) $(BINS) $(OBJS) *.y4m *.mkv
