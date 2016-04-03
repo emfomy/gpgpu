@@ -8,6 +8,7 @@ static const unsigned kFullW = kW*kPixelDim;
 static const unsigned kFullH = kH*kPixelDim;
 static const int kMaxIter = 1024;
 static const int kColorIter = 32;
+static const int kLogBailoutDiameter = 16;
 static const double kZoomBase = -M_LN2/24;
 static const int kZoomIterStart = 24;
 static const int kZoomIterEnd = 960;
@@ -39,13 +40,15 @@ __device__ void QuadraticMap( const double zx, const double zy, double &fx, doub
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Convert the iteration to YUV color
 ///
-__device__ void Iter2YUV( const int iter, uint8_t &y, uint8_t &u, uint8_t &v ) {
+__device__ void Iter2YUV( const int iter, const double z2, uint8_t &y, uint8_t &u, uint8_t &v ) {
   if ( iter == kMaxIter ) {
     y = 0;
     u = 128;
     v = 128;
   } else {
-    double r, g, b, shift = (iter%kColorIter) * 255.0 / kColorIter;
+    double r, g, b;
+    double nu = 1.0 - log(log(z2)/(M_LN2*kLogBailoutDiameter))/M_LN2;
+    double shift = (iter%kColorIter + nu) * 255.0 / kColorIter;
     switch ( (iter/kColorIter) % 6 ) {
       case 0: { // b -> gb
         r = 0;
@@ -85,7 +88,7 @@ __device__ void Iter2YUV( const int iter, uint8_t &y, uint8_t &u, uint8_t &v ) {
       }
     }
 
-    shift = (iter%(kColorIter/2)) * 0.5 / (kColorIter/2);
+    shift = (iter%(kColorIter/2) + nu) * 0.5 / (kColorIter/2);
     if ( (iter/(kColorIter/2)) % 2 == 0 ) {
       r *= 1.0-shift;
       g *= 1.0-shift;
@@ -118,15 +121,16 @@ void MandelbrotSet( uint8_t (*colorY)[kW], uint8_t (*colorU)[kW/2], uint8_t (*co
   // Compute iteration number
   double cx = double(idxx-dimx/2) / (64.0*kPixelDim) * zoom + kCenterX,
          cy = double(idxy-dimy/2) / (64.0*kPixelDim) * zoom + kCenterY,
-         zx = 0, zy = 0, fx, fy;
+         zx = 0.0, zy = 0.0, fx, fy, z2 = 0.0;
   int iter;
-  for ( iter = 0; (zx*zx+zy*zy) < 4.0 && iter < kMaxIter; ++iter ) {
+  for ( iter = 0; z2 < (1 << kLogBailoutDiameter) && iter < kMaxIter; ++iter ) {
     QuadraticMap(zx, zy, fx, fy, cx, cy);
     zx = fx; zy = fy;
+    z2 = zx*zx + zy*zy;
   }
 
   // Compute color
-  Iter2YUV(iter, colorFullY[idxy][idxx], colorFullU[idxy][idxx], colorFullV[idxy][idxx]);
+  Iter2YUV(iter, z2, colorFullY[idxy][idxx], colorFullU[idxy][idxx], colorFullV[idxy][idxx]);
   __syncthreads();
 
   // Merge colors
