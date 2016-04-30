@@ -7,11 +7,12 @@ inline int peekc( FILE *fp ) {
 }
 
 unique_ptr<uint8_t[]> ReadNetpbm( int &width, int &height, int &num_channel, bool &success, const char *filename ) {
-#define FAIL_IF(cond)\
-  if (cond) {\
-    success = false;\
-    return i;\
+#define FAIL_IF( cond ) \
+  if ( cond ) { \
+    success = false; \
+    return i; \
   }
+
   unique_ptr<uint8_t[]> i;
 
   FILE *fp = fopen(filename, "rb");
@@ -30,7 +31,7 @@ unique_ptr<uint8_t[]> ReadNetpbm( int &width, int &height, int &num_channel, boo
   FAIL_IF(fscanf(fp, "%d %d\n%d\n", &width, &height, &norm) != 3);
   FAIL_IF(norm != 255);
 
-  int nbytes = width*height*num_channel;
+  unsigned int nbytes = width*height*num_channel;
   i.reset(new uint8_t[nbytes]);
   FAIL_IF(fread(i.get(), 1, nbytes, fp) != nbytes);
 
