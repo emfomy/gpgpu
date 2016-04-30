@@ -19,7 +19,8 @@ RM      = rm -rf
 all: $(BINS)
 
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) img_background.ppm img_target.ppm img_mask.pgm 130 600 output.ppm
+	diff output.ppm output_true.ppm
 
 $(BINS): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIBS) $(LNKS)
@@ -31,4 +32,4 @@ $(BINS): $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ $(INCS)
 
 clean:
-	$(RM) $(BINS) $(OBJS)
+	$(RM) $(BINS) $(OBJS) output.ppm
