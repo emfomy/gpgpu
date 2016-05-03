@@ -20,7 +20,8 @@ all: $(BINS)
 
 run: $(TARGET)
 	./$(TARGET) img_background.ppm img_target.ppm img_mask.pgm 130 600 output.ppm
-	diff output.ppm output_true.ppm
+
+run: $(TARGET)
 
 $(BINS): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIBS) $(LNKS)
