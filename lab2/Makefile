@@ -17,7 +17,7 @@ RM      = rm -rf
 all: $(BINS)
 
 run: $(TARGET)
-	./$(TARGET) && ffmpeg -y -i result.y4m result.mkv
+	./$(TARGET) && ffmpeg -y -i result.y4m -b:v 50000k result.mkv
 
 $(BINS): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIBS) $(LNKS)

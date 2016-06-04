@@ -113,29 +113,5 @@ void Part3Device( char *text, int *pos, int *head, int text_size, int n_head ) {
 /// Part 3
 ///
 void Part3( char *text, int *pos, int *head, int text_size, int n_head ) {
-// #pragma warning
-//   const int kCheckSize = 1000;
-//   char text_host[kCheckSize];
-
-// #pragma warning
-//   cudaMemcpy(text_host, text, sizeof(char) * kCheckSize, cudaMemcpyDeviceToHost);
-//   for ( auto i = 0; i < kCheckSize; ++i ) {
-//     if ( i % 100 == 0 ) {
-//       printf("\n");
-//     }
-//     printf("%c", (text_host[i] == '\n') ? '_' : text_host[i]);
-//   }
-//   printf("\n");
-
   Part3Device<<<n_head, kNumThread>>>(text, pos, head, text_size, n_head);
-
-// #pragma warning
-//   cudaMemcpy(text_host, text, sizeof(char) * kCheckSize, cudaMemcpyDeviceToHost);
-//   for ( auto i = 0; i < kCheckSize; ++i ) {
-//     if ( i % 100 == 0 ) {
-//       printf("\n");
-//     }
-//     printf("%c", (text_host[i] == '\n') ? '_' : text_host[i]);
-//   }
-//   printf("\n");
 }

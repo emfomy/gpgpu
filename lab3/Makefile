@@ -21,8 +21,6 @@ all: $(BINS)
 run: $(TARGET)
 	./$(TARGET) img_background.ppm img_target.ppm img_mask.pgm 130 600 output.ppm
 
-run: $(TARGET)
-
 $(BINS): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIBS) $(LNKS)
 
